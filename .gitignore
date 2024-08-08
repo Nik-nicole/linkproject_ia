@@ -1,0 +1,25 @@
+# Ignorar el archivo de configuración de pylint
+.pylintrc
+
+# Ignorar directorios de caché y otros archivos temporales
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignorar entornos virtuales
+venv/
+env/
+
+# Ignorar archivos de configuración de IDEs
+.vscode/
+.idea/
+
+# Ignorar archivos de log
+*.log
+
+# Ignorar archivos de compilación
+*.egg
+*.egg-info/
+dist/
+build/
