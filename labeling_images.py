@@ -7,7 +7,7 @@ import mediapipe as mp
 mp_holistic = mp.solutions.holistic
 mp_drawing = mp.solutions.drawing_utils
 
-colors = [
+colors_list = [
     (245, 117, 16),
     (117, 245, 16),
     (16, 117, 245),
@@ -19,6 +19,41 @@ colors = [
     (16, 117, 245),
     (16, 117, 245),
 ]
+
+
+def prob_viz(res, actions, input_frame, colors):
+    """
+    Dibuja un rectángulo con un color específico para cada acción
+    y muestra la probabilidad de cada acción en la parte superior del rectángulo.
+    Args:
+        res (list): Lista de probabilidades de cada acción.
+        actions (list): Lista de nombres de las acciones.
+        input_frame (ndarray): Imagen en formato BGR.
+        colors (list): Lista de colores para cada acción.
+    Returns:
+        ndarray: Imagen en formato BGR con los rectángulos y las probabilidades.
+    """
+    output_frame = input_frame.copy()
+    for num, prob in enumerate(res):
+        cv2.rectangle(
+            output_frame,
+            (0, 60 + num * 40),
+            (int(prob * 100), 90 + num * 40),
+            colors[num],
+            -1,
+        )
+        cv2.putText(
+            output_frame,
+            actions[num],
+            (0, 85 + num * 40),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            1,
+            (255, 255, 255),
+            2,
+            cv2.LINE_AA,
+        )
+
+    return output_frame
 
 
 def mediapipe_detection(image, model):
@@ -87,37 +122,29 @@ def draw_styled_landmarks(image, results):
         image,
         results.face_landmarks,
         mp_holistic.FACEMESH_TESSELATION,
-        mp_drawing.DrawingSpec(color=(80, 110, 10),
-                               thickness=1, circle_radius=1),
-        mp_drawing.DrawingSpec(color=(80, 256, 121),
-                               thickness=1, circle_radius=1),
+        mp_drawing.DrawingSpec(color=(80, 110, 10), thickness=1, circle_radius=1),
+        mp_drawing.DrawingSpec(color=(80, 256, 121), thickness=1, circle_radius=1),
     )
     mp_drawing.draw_landmarks(
         image,
         results.pose_landmarks,
         mp_holistic.POSE_CONNECTIONS,
-        mp_drawing.DrawingSpec(
-            color=(80, 22, 10), thickness=2, circle_radius=4),
-        mp_drawing.DrawingSpec(color=(80, 44, 121),
-                               thickness=2, circle_radius=2),
+        mp_drawing.DrawingSpec(color=(80, 22, 10), thickness=2, circle_radius=4),
+        mp_drawing.DrawingSpec(color=(80, 44, 121), thickness=2, circle_radius=2),
     )
     mp_drawing.draw_landmarks(
         image,
         results.left_hand_landmarks,
         mp_holistic.HAND_CONNECTIONS,
-        mp_drawing.DrawingSpec(color=(121, 22, 76),
-                               thickness=2, circle_radius=4),
-        mp_drawing.DrawingSpec(color=(121, 44, 250),
-                               thickness=2, circle_radius=2),
+        mp_drawing.DrawingSpec(color=(121, 22, 76), thickness=2, circle_radius=4),
+        mp_drawing.DrawingSpec(color=(121, 44, 250), thickness=2, circle_radius=2),
     )
     mp_drawing.draw_landmarks(
         image,
         results.right_hand_landmarks,
         mp_holistic.HAND_CONNECTIONS,
-        mp_drawing.DrawingSpec(color=(245, 117, 66),
-                               thickness=2, circle_radius=4),
-        mp_drawing.DrawingSpec(color=(245, 66, 230),
-                               thickness=2, circle_radius=2),
+        mp_drawing.DrawingSpec(color=(245, 117, 66), thickness=2, circle_radius=4),
+        mp_drawing.DrawingSpec(color=(245, 66, 230), thickness=2, circle_radius=2),
     )
 
 
@@ -163,16 +190,14 @@ def extract_keypoints(results):
     )
     lh = (
         np.array(
-            [[res.x, res.y, res.z]
-                for res in results.left_hand_landmarks.landmark]
+            [[res.x, res.y, res.z] for res in results.left_hand_landmarks.landmark]
         ).flatten()
         if results.left_hand_landmarks
         else np.zeros(21 * 3)
     )
     rh = (
         np.array(
-            [[res.x, res.y, res.z]
-                for res in results.right_hand_landmarks.landmark]
+            [[res.x, res.y, res.z] for res in results.right_hand_landmarks.landmark]
         ).flatten()
         if results.right_hand_landmarks
         else np.zeros(21 * 3)
